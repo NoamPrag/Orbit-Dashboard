@@ -25,17 +25,17 @@ use nt::{CallbackType, Client, ConnectionCallbackType, EntryData, EntryValue, Ne
 use tauri::{window::Window, State};
 
 #[derive(Clone)]
-struct EntryValueWrapper<'a>(&'a EntryValue);
+struct EntryValueWrapper(EntryValue);
 
-impl<'a> serde::ser::Serialize for EntryValueWrapper<'a> {
+impl serde::ser::Serialize for EntryValueWrapper {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        match self.0 {
+        match &self.0 {
             EntryValue::Boolean(value) => serializer.serialize_bool(*value),
             EntryValue::Double(value) => serializer.serialize_f64(*value),
-            EntryValue::String(value) => serializer.serialize_str(value),
+            EntryValue::String(value) => serializer.serialize_str(&value),
             EntryValue::RawData(bytes) => serializer.collect_seq(bytes.iter()),
             EntryValue::BooleanArray(values) => serializer.collect_seq(values.iter()),
             EntryValue::DoubleArray(values) => serializer.collect_seq(values.iter()),
@@ -47,26 +47,37 @@ impl<'a> serde::ser::Serialize for EntryValueWrapper<'a> {
     }
 }
 
+fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<EntryValue> {
+    for (_, entry) in client.entries() {
+        if entry.name == entry_name {
+            return Some(entry.value);
+        }
+    }
+    None
+}
+
 #[tauri::command]
-async fn listen_to_entry<'a>(
-    entry: String,
+fn listen_to_entry<'a>(
+    entry_name: String,
     window: Window,
     conn_state: State<'_, &mut ConnState>,
     // TODO create a struct to hold the Ok variant of the result
-) -> Result<(String, EntryValueWrapper<'a>), String> {
+) -> Result<(String, Option<EntryValueWrapper>), String> {
     match conn_state.deref().0.lock().unwrap().as_mut() {
         Some(client) => {
-            let entry_clone: String = entry.clone(); // TODO don't clone string
+            let entry_clone: String = entry_name.clone(); // TODO don't clone string
 
             client.add_callback(CallbackType::Update, move |entry_data: &EntryData| {
-                let value: EntryValueWrapper = EntryValueWrapper(&entry_data.value);
-                if let Err(err) = window.emit(&entry, value) {
+                let value: EntryValueWrapper = EntryValueWrapper(entry_data.value.clone()); // TODO figure out a way to not clone values
+                if let Err(err) = window.emit(&entry_name, value) {
                     println!("{}", err); // TODO understand window emit error and do something appropriate
                 }
             });
 
-            // TODO return real value of entry
-            Ok((entry_clone, EntryValueWrapper(&EntryValue::Boolean(false))))
+            let entry_value: Option<EntryValueWrapper> = read_entry_value(&entry_clone, client)
+                .map(|value: EntryValue| EntryValueWrapper(value));
+
+            Ok((entry_clone, entry_value))
         }
 
         None => Err(String::from("Couldn't get connection state")), // TODO understand error
