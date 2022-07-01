@@ -19,7 +19,7 @@ impl ConnState {
     }
 }
 
-use std::{ops::Deref, sync::Mutex};
+use std::sync::Mutex;
 
 use nt::{CallbackType, Client, ConnectionCallbackType, EntryData, EntryValue, NetworkTables};
 use tauri::{window::Window, State};
@@ -60,10 +60,10 @@ fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<
 fn listen_to_entry<'a>(
     entry_name: String,
     window: Window,
-    conn_state: State<'_, &mut ConnState>,
+    conn_state: State<'_, ConnState>,
     // TODO create a struct to hold the Ok variant of the result
 ) -> Result<(String, Option<EntryValueWrapper>), String> {
-    match conn_state.deref().0.lock().unwrap().as_mut() {
+    match conn_state.0.lock().unwrap().as_mut() {
         Some(client) => {
             let entry_clone: String = entry_name.clone(); // TODO don't clone string
 
@@ -80,7 +80,7 @@ fn listen_to_entry<'a>(
             Ok((entry_clone, entry_value))
         }
 
-        None => Err(String::from("Couldn't get connection state")), // TODO understand error
+        None => Err(String::from("Not connected to robot")),
     }
 }
 
