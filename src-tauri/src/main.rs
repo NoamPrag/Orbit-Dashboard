@@ -3,6 +3,11 @@
     windows_subsystem = "windows"
 )]
 
+use std::sync::Mutex;
+
+use nt::{CallbackType, Client, ConnectionCallbackType, EntryData, EntryValue, NetworkTables};
+use tauri::{window::Window, State};
+
 #[derive(Default)]
 struct ConnState(Mutex<Option<NetworkTables<Client>>>);
 
@@ -18,11 +23,6 @@ impl ConnState {
         Ok(client)
     }
 }
-
-use std::sync::Mutex;
-
-use nt::{CallbackType, Client, ConnectionCallbackType, EntryData, EntryValue, NetworkTables};
-use tauri::{window::Window, State};
 
 #[derive(Clone)]
 struct EntryValueWrapper(EntryValue);
