@@ -3,6 +3,9 @@
     windows_subsystem = "windows"
 )]
 
+mod entry_value_wrapper;
+use entry_value_wrapper::EntryValueWrapper;
+
 use std::sync::Mutex;
 
 use nt::{CallbackType, Client, EntryData, EntryValue, NetworkTables};
@@ -10,35 +13,6 @@ use tauri::{window::Window, State};
 
 #[derive(Default)]
 struct ConnState(Mutex<Option<NetworkTables<Client>>>);
-
-#[derive(Clone)]
-struct EntryValueWrapper(EntryValue);
-
-impl EntryValueWrapper {
-    fn wrap(entry_value: EntryValue) -> Self {
-        EntryValueWrapper(entry_value)
-    }
-}
-
-impl serde::ser::Serialize for EntryValueWrapper {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        match &self.0 {
-            EntryValue::Boolean(value) => serializer.serialize_bool(*value),
-            EntryValue::Double(value) => serializer.serialize_f64(*value),
-            EntryValue::String(value) => serializer.serialize_str(&value),
-            EntryValue::RawData(bytes) => serializer.collect_seq(bytes.iter()),
-            EntryValue::BooleanArray(values) => serializer.collect_seq(values.iter()),
-            EntryValue::DoubleArray(values) => serializer.collect_seq(values.iter()),
-            EntryValue::StringArray(values) => serializer.collect_seq(values.iter()),
-            EntryValue::RpcDefinition(_) => {
-                serializer.serialize_unit_variant("RpcDefinition", 0, "V0")
-            }
-        }
-    }
-}
 
 fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<EntryValue> {
     for (_, entry) in client.entries() {
