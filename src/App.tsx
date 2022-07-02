@@ -1,14 +1,24 @@
-import { Component, createSignal } from "solid-js";
+import { Accessor, Component, JSX } from "solid-js";
 import "./App.scss";
+import { createNetworkTableSignal } from "./network/NetworkTables";
 
-const App: Component = () => {
-  const [counter, setCounter] = createSignal(0);
-  setInterval(setCounter, 1000, (c: number): number => c + 1);
+const robotX: Accessor<number> = await createNetworkTableSignal(
+  "/Match/Pos/X",
+  0
+);
 
+const robotY: Accessor<number> = await createNetworkTableSignal(
+  "/Match/Pos/Y",
+  0
+);
+
+const App: Component = (): JSX.Element => {
   return (
     <>
       <div>
-        <h1>{counter()}</h1>
+        <h1>
+          pos: ({robotX().toFixed(2)}, {robotY().toFixed(2)})
+        </h1>
       </div>
     </>
   );
