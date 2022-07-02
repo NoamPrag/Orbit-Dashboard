@@ -1,15 +1,15 @@
 use nt::EntryValue;
 
 #[derive(Clone)]
-pub struct EntryValueWrapper(EntryValue);
+pub struct SerializableEntryValue(EntryValue);
 
-impl EntryValueWrapper {
+impl SerializableEntryValue {
     pub fn wrap(entry_value: EntryValue) -> Self {
-        EntryValueWrapper(entry_value)
+        SerializableEntryValue(entry_value)
     }
 }
 
-impl serde::ser::Serialize for EntryValueWrapper {
+impl serde::ser::Serialize for SerializableEntryValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,

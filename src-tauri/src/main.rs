@@ -3,8 +3,8 @@
     windows_subsystem = "windows"
 )]
 
-mod entry_value_wrapper;
-use entry_value_wrapper::EntryValueWrapper;
+mod serializable_entry_value;
+use serializable_entry_value::SerializableEntryValue;
 
 use std::sync::Mutex;
 
@@ -29,20 +29,21 @@ async fn listen_to_entry<'a>(
     window: Window,
     conn_state: State<'_, ConnState>,
     // TODO: create a struct to hold the Ok variant of the result
-) -> Result<(String, Option<EntryValueWrapper>), String> {
+) -> Result<(String, Option<SerializableEntryValue>), String> {
     match conn_state.0.lock().unwrap().as_mut() {
         Some(client) => {
             let entry_name_clone: String = entry_name.clone(); // TODO: don't clone string
 
             client.add_callback(CallbackType::Update, move |entry_data: &EntryData| {
-                let value: EntryValueWrapper = EntryValueWrapper::wrap(entry_data.value.clone()); // TODO: figure out a way to not clone values
+                let value: SerializableEntryValue =
+                    SerializableEntryValue::wrap(entry_data.value.clone()); // TODO: figure out a way to not clone values
                 if let Err(err) = window.emit(&entry_name_clone, value) {
                     println!("{}", err); // TODO: understand window emit error and do something appropriate
                 }
             });
 
-            let entry_value: Option<EntryValueWrapper> =
-                read_entry_value(&entry_name, client).map(EntryValueWrapper::wrap);
+            let entry_value: Option<SerializableEntryValue> =
+                read_entry_value(&entry_name, client).map(SerializableEntryValue::wrap);
 
             Ok((entry_name, entry_value))
         }
