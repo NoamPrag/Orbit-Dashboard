@@ -6,13 +6,11 @@
 mod serializable_entry_value;
 use serializable_entry_value::SerializableEntryValue;
 
-use std::sync::Mutex;
+mod connection;
+use connection::ConnectionState;
 
 use nt::{CallbackType, Client, EntryData, EntryValue, NetworkTables};
 use tauri::{window::Window, State};
-
-#[derive(Default)]
-struct ConnState(Mutex<Option<NetworkTables<Client>>>);
 
 fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<EntryValue> {
     for (_, entry) in client.entries() {
@@ -27,7 +25,7 @@ fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<
 async fn listen_to_entry<'a>(
     entry_name: String,
     window: Window,
-    conn_state: State<'_, ConnState>,
+    conn_state: State<'_, ConnectionState>,
     // TODO: create a struct to hold the Ok variant of the result
 ) -> Result<(String, Option<SerializableEntryValue>), String> {
     match conn_state.0.lock().unwrap().as_mut() {
@@ -52,15 +50,6 @@ async fn listen_to_entry<'a>(
     }
 }
 
-#[tauri::command]
-async fn connect(ip: String, conn_state: State<'_, ConnState>) -> Result<(), ()> {
-    // TODO: convert nt::Error to string and return it in case of a failure
-    let connected_state: Option<NetworkTables<Client>> =
-        Some(NetworkTables::connect(&ip, "OrbitDashboard").await.unwrap());
-    *conn_state.0.lock().unwrap() = connected_state;
-    Ok(())
-}
-
 fn main() {
     let context = tauri::generate_context!();
 
@@ -72,8 +61,11 @@ fn main() {
 
     tauri::Builder::default()
         .menu(menu)
-        .manage(ConnState::default())
-        .invoke_handler(tauri::generate_handler![connect, listen_to_entry])
+        .manage(ConnectionState::default())
+        .invoke_handler(tauri::generate_handler![
+            connection::connect,
+            listen_to_entry
+        ])
         .run(context)
         .expect("error while running tauri application");
 }
