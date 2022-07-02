@@ -33,6 +33,10 @@ async fn listen_to_entry<'a>(
             let entry_name_clone: String = entry_name.clone(); // TODO: don't clone string
 
             client.add_callback(CallbackType::Update, move |entry_data: &EntryData| {
+                if &entry_data.name != &entry_name_clone {
+                    return; // Don't send values of other entries
+                }
+
                 let serializable_value: SerializableEntryValue =
                     SerializableEntryValue::wrap(entry_data.value.clone()); // TODO: figure out a way to not clone values
                 if let Err(err) = window.emit(&entry_name_clone, serializable_value) {
