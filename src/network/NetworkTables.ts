@@ -57,7 +57,10 @@ export const createNetworkTableSignal = async <T>(
         setValue((): T => ipcEvent.payload);
       });
     })
-    .catch(console.error);
+    .catch((err): void => {
+      console.log(err);
+      setValue((): T => defaultValue);
+    });
 
   return value;
 };
