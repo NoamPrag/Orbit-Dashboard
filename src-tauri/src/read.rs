@@ -26,6 +26,7 @@ pub fn listen_to_entry<'a>(
 
             client.add_callback(CallbackType::Update, move |entry_data: &EntryData| {
                 if &entry_data.name != &entry_name_clone {
+                    // TODO: use only one update callback that sends values to corresponding channels, based on entries' names
                     return; // Don't send values of other entries
                 }
 
