@@ -3,12 +3,12 @@ import "./App.scss";
 import { createNetworkTableSignal } from "./network/NetworkTables";
 
 const robotX: Accessor<number> = await createNetworkTableSignal(
-  "/Match/Pos/X",
+  "/Match/Pose/X",
   0
 );
 
 const robotY: Accessor<number> = await createNetworkTableSignal(
-  "/Match/Pos/Y",
+  "/Match/Pose/Y",
   0
 );
 
