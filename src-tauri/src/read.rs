@@ -13,13 +13,18 @@ fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<
     None
 }
 
+#[derive(serde::Serialize)]
+pub struct NetworkTableListenResult {
+    ipc_channel: String,
+    initial_value: Option<SerializableEntryValue>,
+}
+
 #[tauri::command]
 pub fn listen_to_entry<'a>(
     entry_name: String,
     window: Window,
     conn_state: State<'_, ConnectionState>,
-    // TODO: create a struct to hold the Ok variant of the result
-) -> Result<(String, Option<SerializableEntryValue>), String> {
+) -> Result<NetworkTableListenResult, String> {
     match conn_state.0.lock().unwrap().as_mut() {
         Some(client) => {
             let entry_name_clone: String = entry_name.clone(); // TODO: don't clone string
@@ -41,7 +46,10 @@ pub fn listen_to_entry<'a>(
             let entry_value: Option<SerializableEntryValue> =
                 read_entry_value(&entry_name, client).map(SerializableEntryValue::wrap);
 
-            Ok((entry_name, entry_value))
+            Ok(NetworkTableListenResult {
+                ipc_channel: entry_name,
+                initial_value: entry_value,
+            })
         }
 
         None => Err(String::from("Not connected to robot")),

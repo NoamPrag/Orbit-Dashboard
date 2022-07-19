@@ -7,13 +7,13 @@ interface NetworkTableListenResult<T> {
   readonly initialValue?: T;
 }
 
-type ListenCommandResponse<T> = [string, T];
+type ListenCommandResponse<T> = { initial_value: T; ipc_channel: string };
 
 const parseResponse = <T>(
   response: ListenCommandResponse<T>
 ): NetworkTableListenResult<T> => ({
-  ipcChannel: response[0],
-  initialValue: response[1],
+  ipcChannel: response.ipc_channel,
+  initialValue: response.initial_value,
 });
 
 const reportTypeMismatch = (
