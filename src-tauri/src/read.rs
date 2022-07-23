@@ -1,17 +1,9 @@
-use nt::{CallbackType, Client, EntryData, EntryValue, NetworkTables};
+use nt::{CallbackType, EntryData};
 use tauri::{State, Window};
 
 use crate::connection::ConnectionState;
+use crate::entry::read_entry_value;
 use crate::serializable_entry_value::SerializableEntryValue;
-
-fn read_entry_value(entry_name: &str, client: &NetworkTables<Client>) -> Option<EntryValue> {
-    for (_, entry) in client.entries() {
-        if entry.name == entry_name {
-            return Some(entry.value);
-        }
-    }
-    None
-}
 
 #[derive(serde::Serialize)]
 pub struct NetworkTableListenResult {
@@ -20,12 +12,12 @@ pub struct NetworkTableListenResult {
 }
 
 #[tauri::command]
-pub fn listen_to_entry<'a>(
+pub async fn listen_to_entry(
     entry_name: String,
     window: Window,
     conn_state: State<'_, ConnectionState>,
 ) -> Result<NetworkTableListenResult, String> {
-    match conn_state.0.lock().unwrap().as_mut() {
+    match conn_state.0.lock().await.as_mut() {
         Some(client) => {
             let entry_name_clone: String = entry_name.clone(); // TODO: don't clone string
 

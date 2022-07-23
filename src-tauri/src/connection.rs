@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use async_mutex::Mutex;
 
 use nt::{Client, NetworkTables};
 use tauri::State;
@@ -10,12 +10,14 @@ const CLIENT_NAME: &str = "Orbit-Dashboard";
 
 #[tauri::command]
 pub async fn connect(ip: String, conn_state: State<'_, ConnectionState>) -> Result<(), String> {
-    let client = NetworkTables::connect(&ip, CLIENT_NAME).await;
-    if let Err(e) = client {
-        return Err(e.to_string());
-    }
+    let conn_result = NetworkTables::connect(&ip, CLIENT_NAME).await;
 
-    let connected_state: Option<NetworkTables<Client>> = Some(client.unwrap());
-    *conn_state.0.lock().unwrap() = connected_state;
-    Ok(())
+    match conn_result {
+        Ok(client) => {
+            // If lock doesn't work: try https://docs.rs/futures/0.3.21/futures/lock/struct.Mutex.html
+            *conn_state.0.lock().await = Some(client);
+            Ok(())
+        }
+        Err(err) => Err(err.to_string()),
+    }
 }
