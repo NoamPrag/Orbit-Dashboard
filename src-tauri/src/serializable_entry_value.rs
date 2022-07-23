@@ -1,30 +1,44 @@
-use nt::EntryValue;
+use nt::{EntryValue, RpcDefinition::V0};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
-pub struct SerializableEntryValue(EntryValue);
+#[derive(Serialize, Deserialize, Clone)]
+pub enum SerializableEntryValue {
+    Boolean(bool),
+    Double(f64),
+    String(String),
+    RawData(Vec<u8>),
+    BooleanArray(Vec<bool>),
+    DoubleArray(Vec<f64>),
+    StringArray(Vec<String>),
+    RpcDefinition,
+}
 
-impl SerializableEntryValue {
-    pub fn wrap(entry_value: EntryValue) -> Self {
-        SerializableEntryValue(entry_value)
+impl From<EntryValue> for SerializableEntryValue {
+    fn from(value: EntryValue) -> Self {
+        match value {
+            EntryValue::Boolean(value) => SerializableEntryValue::Boolean(value),
+            EntryValue::Double(value) => SerializableEntryValue::Double(value),
+            EntryValue::String(value) => SerializableEntryValue::String(value),
+            EntryValue::RawData(bytes) => SerializableEntryValue::RawData(bytes),
+            EntryValue::BooleanArray(values) => SerializableEntryValue::BooleanArray(values),
+            EntryValue::DoubleArray(values) => SerializableEntryValue::DoubleArray(values),
+            EntryValue::StringArray(values) => SerializableEntryValue::StringArray(values),
+            EntryValue::RpcDefinition(_) => SerializableEntryValue::RpcDefinition,
+        }
     }
 }
 
-impl serde::ser::Serialize for SerializableEntryValue {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        match &self.0 {
-            EntryValue::Boolean(value) => serializer.serialize_bool(*value),
-            EntryValue::Double(value) => serializer.serialize_f64(*value),
-            EntryValue::String(value) => serializer.serialize_str(&value),
-            EntryValue::RawData(bytes) => serializer.collect_seq(bytes.iter()),
-            EntryValue::BooleanArray(values) => serializer.collect_seq(values.iter()),
-            EntryValue::DoubleArray(values) => serializer.collect_seq(values.iter()),
-            EntryValue::StringArray(values) => serializer.collect_seq(values.iter()),
-            EntryValue::RpcDefinition(_) => {
-                serializer.serialize_unit_variant("RpcDefinition", 0, "V0")
-            }
+impl Into<EntryValue> for SerializableEntryValue {
+    fn into(self) -> EntryValue {
+        match self {
+            SerializableEntryValue::Boolean(value) => EntryValue::Boolean(value),
+            SerializableEntryValue::Double(value) => EntryValue::Double(value),
+            SerializableEntryValue::String(value) => EntryValue::String(value),
+            SerializableEntryValue::RawData(bytes) => EntryValue::RawData(bytes),
+            SerializableEntryValue::BooleanArray(values) => EntryValue::BooleanArray(values),
+            SerializableEntryValue::DoubleArray(values) => EntryValue::DoubleArray(values),
+            SerializableEntryValue::StringArray(values) => EntryValue::StringArray(values),
+            SerializableEntryValue::RpcDefinition => EntryValue::RpcDefinition(V0),
         }
     }
 }

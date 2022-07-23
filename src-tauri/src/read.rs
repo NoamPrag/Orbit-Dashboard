@@ -28,7 +28,7 @@ pub async fn listen_to_entry(
                 }
 
                 let serializable_value: SerializableEntryValue =
-                    SerializableEntryValue::wrap(entry_data.value.clone()); // TODO: figure out a way to not clone values
+                    SerializableEntryValue::from(entry_data.value.clone()); // TODO: figure out a way to not clone values
 
                 window
                     .emit(&entry_name_clone, serializable_value)
@@ -36,7 +36,7 @@ pub async fn listen_to_entry(
             });
 
             let entry_value: Option<SerializableEntryValue> =
-                read_entry_value(&entry_name, client).map(SerializableEntryValue::wrap);
+                read_entry_value(&entry_name, client).map(SerializableEntryValue::from);
 
             Ok(NetworkTableListenResult {
                 ipc_channel: entry_name,
