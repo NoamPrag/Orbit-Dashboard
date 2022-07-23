@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+mod entry;
+
 mod read;
 mod serializable_entry_value;
 
