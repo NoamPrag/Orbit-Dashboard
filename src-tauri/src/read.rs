@@ -22,7 +22,7 @@ pub async fn listen_to_entry(
             let entry_name_clone: String = entry_name.clone(); // TODO: don't clone string
 
             client.add_callback(CallbackType::Update, move |entry_data: &EntryData| {
-                if &entry_data.name != &entry_name_clone {
+                if entry_data.name != entry_name_clone {
                     // TODO: use only one update callback that sends values to corresponding channels, based on entries' names
                     return; // Don't send values of other entries
                 }
