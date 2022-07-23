@@ -8,6 +8,8 @@ mod entry;
 mod read;
 mod serializable_entry_value;
 
+mod write;
+
 mod connection;
 use connection::ConnectionState;
 
@@ -25,7 +27,8 @@ fn main() {
         .manage(ConnectionState::default())
         .invoke_handler(tauri::generate_handler![
             connection::connect,
-            read::listen_to_entry
+            read::listen_to_entry,
+            write::set_entry_value,
         ])
         .run(context)
         .expect("error while running tauri application");
