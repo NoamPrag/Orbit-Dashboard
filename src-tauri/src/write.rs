@@ -11,10 +11,9 @@ pub async fn set_entry_value(
     value: SerializableEntryValue,
     conn_state: State<'_, ConnectionState>,
 ) -> Result<(), String> {
-    let value: EntryValue = value.into();
-
     match conn_state.0.lock().await.as_mut() {
         Some(client) => {
+            let value: EntryValue = value.into();
             match get_entry_id(&entry_name, client) {
                 // If an entry id exists, an entry with the given name already exists
                 Some(id) => client.update_entry(id, value),
