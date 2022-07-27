@@ -1,6 +1,6 @@
 import { Accessor, Component, JSX } from "solid-js";
 import "./App.scss";
-import { createNetworkTableSignal } from "./network/NetworkTables";
+import { createNetworkTableSignal } from "./network";
 
 const robotX: Accessor<number> = await createNetworkTableSignal(
   "/Match/Pose/X",
