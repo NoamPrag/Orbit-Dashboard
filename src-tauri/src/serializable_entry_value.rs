@@ -29,9 +29,9 @@ impl From<EntryValue> for SerializableEntryValue {
     }
 }
 
-impl Into<EntryValue> for SerializableEntryValue {
-    fn into(self) -> EntryValue {
-        match self {
+impl From<SerializableEntryValue> for EntryValue {
+    fn from(value: SerializableEntryValue) -> Self {
+        match value {
             SerializableEntryValue::Boolean(value) => EntryValue::Boolean(value),
             SerializableEntryValue::Double(value) => EntryValue::Double(value),
             SerializableEntryValue::String(value) => EntryValue::String(value),
