@@ -3,9 +3,8 @@ import "./App.scss";
 import { createNetworkTableSignal } from "./network";
 import { createNetworkTableSetter, NetworkTableSetter } from "./network/write";
 
-const setEntry: NetworkTableSetter<number> = await createNetworkTableSetter(
-  "/Example/Entry"
-);
+const setEntry: NetworkTableSetter<number> =
+  createNetworkTableSetter("/Example/Entry");
 
 const robotX: Accessor<number> = await createNetworkTableSignal(
   "/Match/Pose/X",
