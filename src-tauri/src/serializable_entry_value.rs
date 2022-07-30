@@ -1,7 +1,8 @@
 use nt::{EntryValue, RpcDefinition::V0};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(tag = "type", content = "content")]
 pub enum SerializableEntryValue {
     Boolean(bool),
     Double(f64),
