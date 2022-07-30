@@ -1,6 +1,11 @@
 import { Accessor, Component, JSX } from "solid-js";
 import "./App.scss";
 import { createNetworkTableSignal } from "./network";
+import { createNetworkTableSetter, NetworkTableSetter } from "./network/write";
+
+const setEntry: NetworkTableSetter<number> = await createNetworkTableSetter(
+  "/Example/Entry"
+);
 
 const robotX: Accessor<number> = await createNetworkTableSignal(
   "/Match/Pose/X",
@@ -13,6 +18,7 @@ const robotY: Accessor<number> = await createNetworkTableSignal(
 );
 
 const App: Component = (): JSX.Element => {
+  setEntry(1);
   return (
     <>
       <div>
