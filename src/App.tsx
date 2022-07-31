@@ -1,7 +1,10 @@
 import { Accessor, Component, JSX } from "solid-js";
 import "./App.scss";
-import { createNetworkTableSignal } from "./network";
-import { createNetworkTableSetter, NetworkTableSetter } from "./network/write";
+import {
+  createNetworkTableSignal,
+  createNetworkTableSetter,
+  NetworkTableSetter,
+} from "./network";
 
 const setEntry: NetworkTableSetter<number> =
   createNetworkTableSetter("/Example/Entry");

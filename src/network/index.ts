@@ -1,4 +1,8 @@
 import { createNetworkTableSignal } from "./read";
-import { createNetworkTableSetter } from "./write";
+import { createNetworkTableSetter, NetworkTableSetter } from "./write";
 
-export { createNetworkTableSignal, createNetworkTableSetter };
+export {
+  createNetworkTableSignal,
+  createNetworkTableSetter,
+  NetworkTableSetter,
+};
